@@ -9,8 +9,8 @@ class Student_Progress(models.Model):
     chemistry_mark = models.FloatField(blank=True, validators=[MinValueValidator(0.0), MaxValueValidator(100.0)])
     physics_mark = models.FloatField(blank=True, validators=[MinValueValidator(0.0), MaxValueValidator(100.0)])
     maths_mark = models.FloatField(blank=True, validators=[MinValueValidator(0.0), MaxValueValidator(100.0)])
-    total_mark = models.IntegerField(default=300, editable=False)
-    gained_mark = models.IntegerField(default=0)
+    out_off = models.IntegerField(blank=True, null=True,default=300, editable=False)
+    gained_mark = models.FloatField(blank=True, null=True, editable=False)
     class_teacher = models.CharField(max_length=50)
     percentage = models.FloatField(editable=False, blank=True, null=True)
 

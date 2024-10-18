@@ -5,3 +5,4 @@ class StudentSerializer(serializers.ModelSerializer):  # ModelSerializer (singul
     class Meta:
         model = Students  # Ensure this matches your model's name
         fields = "__all__"  # This will include all fields of the model
+
