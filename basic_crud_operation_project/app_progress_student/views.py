@@ -9,9 +9,9 @@ from .serializers import *
 
 class StudentCrudOperation(APIView):
 
-    # create the object to the db
+    """to enter students data single and bulk"""
     def post(self, request, *args, **kwargs):
-        serialize = StudentProcessSerializer(data = request.data)
+        serialize = StudentProcessSerializer(data = request.data, many=True)
         if serialize.is_valid():
             try:
                 serialize.save()
@@ -24,7 +24,7 @@ class StudentCrudOperation(APIView):
         else:
             return Response(serialize.errors, status=HTTP_400_BAD_REQUEST)
         
-
+    """to get all the students list"""
     def get(self,request):
         try:
             list_students = Student_Progress.objects.all()
@@ -33,6 +33,17 @@ class StudentCrudOperation(APIView):
         except Exception as e:
             return Response({'error':'An error occurred while retrieving students list', 'details':str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+    """to delete all the students records"""
+    def delete(self, request):
+        students = Student_Progress.objects.all()
+
+        # Checking  if there are records to delete
+        if students.exists():
+            students.delete()
+            return Response({"message": "All student records deleted successfully!"}, status=HTTP_200_OK)
+        else:
+            return Response({"error": "No records found to delete!"}, status=HTTP_404_NOT_FOUND)
     
 
 
@@ -159,3 +170,18 @@ class StudentSortedBy(APIView):
                 return Response({'error':'No Teacher Found'}, status=HTTP_400_BAD_REQUEST)
             except Exception as e:
                 return Response({'error':'An error occurred while retrieving data from the server', 'details':str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class StudentMarkFiltration(APIView):
+
+    """method to filter the list based on:
+        * average total mark
+        * average chemistry mark
+        * average maths mark
+        * average physics mark
+        * average percentage
+        * top 5 students
+        * failed students
+    """
+    def get(sef, request):
+        pass
