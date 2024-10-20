@@ -5,5 +5,4 @@ class Students(models.Model):
     roll_no = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.name  # Optional: useful for representing objects as strings in Django admin or shell
-
+        return self.name  

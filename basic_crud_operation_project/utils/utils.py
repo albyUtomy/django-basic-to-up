@@ -32,8 +32,6 @@ def teacher_analysis(db):
     # Define the passing criteria
     passing_criteria = Q(chemistry_mark__gte=40) & Q(physics_mark__gte=40) & Q(maths_mark__gte=40)
     
-    # Query to get all students
-    all_students = db.objects.all()
     
     # Group by teacher and annotate with counts of passed and failed students
     teacher_stats = (
@@ -45,7 +43,7 @@ def teacher_analysis(db):
         )
     )
     
-    # Prepare the report
+    # Report
     report = []
     for teacher in teacher_stats:
         total_students = teacher['passed_count'] + teacher['failed_count']
