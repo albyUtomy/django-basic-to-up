@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
 from django.db import IntegrityError
 
-from utils.utils import get_average
+from utils.utils import get_average, teacher_analysis
 
 from .models import Student_Progress
 from django.db.models import Q
@@ -162,7 +162,7 @@ class SortByTeacher(APIView):
             return Response({'error':'An error occurred while retrieving data from the server', 'details':str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
         
 
-class StudentMarkFiltration(APIView):
+class StudentMarkStatistic(APIView):
     def get(self, request, filtration=None):
         if filtration == 'average-marks' in request.path:
             try:
@@ -223,5 +223,12 @@ class StudentMarkFiltration(APIView):
                     'details': str(e)
                 }, status=HTTP_500_INTERNAL_SERVER_ERROR)
             
-        elif filtration == 'best-teacher':
-            pass
+        elif filtration == 'teacher-analysis':
+            try:
+                analysis_result = teacher_analysis(Student_Progress)
+                return Response(analysis_result, status=HTTP_200_OK)
+            except Exception as e:
+                return Response({
+                    'error': 'An error occurred while retrieving the analysis',
+                    'details': str(e)
+                }, status=HTTP_500_INTERNAL_SERVER_ERROR)
