@@ -6,6 +6,7 @@ from django.db import IntegrityError
 
 from .models import Student_Progress
 from .serializers import *
+from django.db.models import Avg
 
 class StudentCrudOperation(APIView):
 
@@ -123,7 +124,7 @@ class StudentSortedBy(APIView):
     """
 
     def get(self, request, para_url=None):
-        if 'chemistry-mark-list' in request.path:
+        if para_url == 'chemistry' in request.path:
             list_chemistry_mark = Student_Progress.objects.exclude(chemistry_mark = None)
             serialize = CombinedMarksSerializer(list_chemistry_mark, many=True)
 
@@ -131,7 +132,7 @@ class StudentSortedBy(APIView):
             return Response(chemistry_mark,status=HTTP_200_OK)
         
 
-        elif 'maths-mark-list' in request.path:
+        elif para_url== 'maths' in request.path:
             list_maths_mark = Student_Progress.objects.exclude(maths_mark = None)
             serialize = CombinedMarksSerializer(list_maths_mark, many=True)
 
@@ -139,7 +140,7 @@ class StudentSortedBy(APIView):
             return Response(maths_mark,status=HTTP_200_OK)
 
 
-        elif 'physics-mark-list' in request.path:
+        elif para_url== 'physics' in request.path:
             list_physics_mark = Student_Progress.objects.exclude(physics_mark = None)
             serialize = CombinedMarksSerializer(list_physics_mark, many=True)
 
@@ -149,11 +150,11 @@ class StudentSortedBy(APIView):
 
 
 
-        elif 'sort-by-class_teacher' in request.path:
+        elif 'class_teacher' in request.path:
             try:
                 getBy_class_teacher = Student_Progress.objects.order_by('class_teacher')
                 serialize = TeacherSortSerializer(getBy_class_teacher, many=True)
-                return Response({'sort-by-class-teacher':serialize.data}, status=HTTP_200_OK)
+                return Response({'class-teacher':serialize.data}, status=HTTP_200_OK)
             
             except Student_Progress.DoesNotExist:
                 return Response({'error':'No Teacher Found'}, status=HTTP_400_BAD_REQUEST)
@@ -183,5 +184,17 @@ class StudentMarkFiltration(APIView):
         * top 5 students
         * failed students
     """
-    def get(sef, request):
-        pass
+    def get(sef, request, subject=None):
+        if 'average-list' in request.path:
+            avg_marks = Student_Progress.objects.aggregate(
+            average_chemistry=Avg('chemistry_mark'),
+            average_physics=Avg('physics_mark'),
+            average_maths=Avg('maths_mark')
+        )
+        
+        return Response({
+            "average_chemistry_mark": avg_marks['average_chemistry'],
+            "average_physics_mark": avg_marks['average_physics'],
+            "average_maths_mark": avg_marks['average_maths']
+        }, status=HTTP_200_OK)
+        
