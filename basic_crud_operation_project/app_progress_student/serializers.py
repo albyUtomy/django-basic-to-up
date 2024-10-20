@@ -51,7 +51,7 @@ class CombinedMarksSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student_Progress
-        fields = ['name', 'roll_no', 'chemistry_mark', 'physics_mark', 'maths_mark']
+        fields = ['name', 'roll_no', 'chemistry_mark', 'physics_mark', 'maths_mark', 'gained_mark','percentage']
 
 
 class TeacherSortSerializer(serializers.ModelSerializer):

@@ -4,9 +4,11 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
 from django.db import IntegrityError
 
+from utils.utils import get_average
+
 from .models import Student_Progress
+from django.db.models import Q
 from .serializers import *
-from django.db.models import Avg
 
 class StudentCrudOperation(APIView):
 
@@ -120,11 +122,11 @@ class StudentSortedBy(APIView):
         * physics mark list
         * ordered by class teacher name
         * list the student of specific class teacher
-        * "para_url is the parameter passed from the url it can by id class_teacher or roll number"
+        * "subject is the parameter passed from the url it can by id class_teacher or roll number"
     """
 
-    def get(self, request, para_url=None):
-        if para_url == 'chemistry' in request.path:
+    def get(self, request, subject=None):
+        if subject == 'chemistry':
             list_chemistry_mark = Student_Progress.objects.exclude(chemistry_mark = None)
             serialize = CombinedMarksSerializer(list_chemistry_mark, many=True)
 
@@ -132,7 +134,7 @@ class StudentSortedBy(APIView):
             return Response(chemistry_mark,status=HTTP_200_OK)
         
 
-        elif para_url== 'maths' in request.path:
+        elif subject== 'maths':
             list_maths_mark = Student_Progress.objects.exclude(maths_mark = None)
             serialize = CombinedMarksSerializer(list_maths_mark, many=True)
 
@@ -140,61 +142,86 @@ class StudentSortedBy(APIView):
             return Response(maths_mark,status=HTTP_200_OK)
 
 
-        elif para_url== 'physics' in request.path:
+        elif subject== 'physics':
             list_physics_mark = Student_Progress.objects.exclude(physics_mark = None)
             serialize = CombinedMarksSerializer(list_physics_mark, many=True)
 
             physics_mark = [{'name':student['name'], 'roll_no':student['roll_no'], 'physics_mark':student['physics_mark']} for student in serialize.data]
             return Response(physics_mark,status=HTTP_200_OK)
         
-
-
-
-        elif 'class_teacher' in request.path:
-            try:
-                getBy_class_teacher = Student_Progress.objects.order_by('class_teacher')
-                serialize = TeacherSortSerializer(getBy_class_teacher, many=True)
-                return Response({'class-teacher':serialize.data}, status=HTTP_200_OK)
-            
-            except Student_Progress.DoesNotExist:
-                return Response({'error':'No Teacher Found'}, status=HTTP_400_BAD_REQUEST)
-            except Exception as e:
-                return Response({'error':'An error occurred while retrieving data from the server', 'details':str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-        elif 'class_teacher' in request.path:
-            try:
-                sortBy_class_teacher = Student_Progress.objects.filter(class_teacher = para_url)
-                serialize = TeacherSortSerializer(sortBy_class_teacher, many=True)
-                return Response({'sort-by-class-teacher':serialize.data}, status=HTTP_200_OK)
-            except Student_Progress.DoesNotExist:
-                return Response({'error':'No Teacher Found'}, status=HTTP_400_BAD_REQUEST)
-            except Exception as e:
-                return Response({'error':'An error occurred while retrieving data from the server', 'details':str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
-
+# Sort by class teacher
+class SortByTeacher(APIView):
+    def get(self, request, teacher_name=None):
+        try:
+            teacher_name = Student_Progress.objects.filter(class_teacher=teacher_name)
+            serialize = TeacherSortSerializer(teacher_name, many=True)
+            return Response(serialize.data, status=HTTP_200_OK)
+        except Student_Progress.DoesNotExist:
+            return Response({'error':'Not Found'}, status=HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error':'An error occurred while retrieving data from the server', 'details':str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+        
 
 class StudentMarkFiltration(APIView):
+    def get(self, request, filtration=None):
+        if filtration == 'average-marks' in request.path:
+            try:
+                # Fetching marks from the database
+                physics_marks = list(Student_Progress.objects.values_list('physics_mark', flat=True))
+                maths_marks = list(Student_Progress.objects.values_list('maths_mark', flat=True))
+                chemistry_marks = list(Student_Progress.objects.values_list('chemistry_mark', flat=True))
+                gained_marks = list(Student_Progress.objects.values_list('gained_mark', flat=True))
+                percentage = list(Student_Progress.objects.values_list('percentage', flat=True))
 
-    """method to filter the list based on:
-        * average total mark
-        * average chemistry mark
-        * average maths mark
-        * average physics mark
-        * average percentage
-        * top 5 students
-        * failed students
-    """
-    def get(sef, request, subject=None):
-        if 'average-list' in request.path:
-            avg_marks = Student_Progress.objects.aggregate(
-            average_chemistry=Avg('chemistry_mark'),
-            average_physics=Avg('physics_mark'),
-            average_maths=Avg('maths_mark')
-        )
+                # Calculating averages
+                avg_data = {
+                    "average_chemistry_mark": get_average(chemistry_marks),
+                    "average_physics_mark": get_average(physics_marks),
+                    "average_maths_mark": get_average(maths_marks),
+                    "average_gained_total":get_average(gained_marks),
+                    "average_percentage": get_average(percentage)
+                }
+
+                return Response({'average': avg_data}, status=HTTP_200_OK)
+
+            except Exception as e:
+                return Response({
+                    "error": "An error occurred while fetching averages.",
+                    "details": str(e)
+                }, status=HTTP_500_INTERNAL_SERVER_ERROR)
         
-        return Response({
-            "average_chemistry_mark": avg_marks['average_chemistry'],
-            "average_physics_mark": avg_marks['average_physics'],
-            "average_maths_mark": avg_marks['average_maths']
-        }, status=HTTP_200_OK)
+        elif filtration == 'report-failed':
+            try:
+                students= Student_Progress.objects.all()
+                failed_students = students.filter(
+                Q(chemistry_mark__lt=40) | 
+                Q(physics_mark__lt=40) | 
+                Q(maths_mark__lt=40)
+                
+            )
+                serialize = CombinedMarksSerializer(failed_students, many=True)
+                return Response({
+                    'failed_students': serialize.data
+                    }, status=HTTP_200_OK)
+            
+            except Exception as e:
+                return Response({
+                'error': 'An error occurred while retrieving data failed students record.',
+                'details': str(e)
+            },status=HTTP_500_INTERNAL_SERVER_ERROR)
+
         
+        elif filtration == 'top5':
+            try:
+                top_students = Student_Progress.objects.filter(gained_mark__isnull=False).order_by('-gained_mark')[:5]
+                serialize = CombinedMarksSerializer(top_students, many=True)
+                return Response({'top_students': serialize.data}, status=HTTP_200_OK)
+
+            except Exception as e:
+                return Response({
+                    'error': 'An error occurred while retrieving data.',
+                    'details': str(e)
+                }, status=HTTP_500_INTERNAL_SERVER_ERROR)
+            
+        elif filtration == 'best-teacher':
+            pass
