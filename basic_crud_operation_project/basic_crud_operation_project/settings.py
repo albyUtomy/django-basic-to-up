@@ -32,9 +32,6 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'app_progress_student',
-    'app_student',
-    'app_todo',
-    'app_api',
     'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
