@@ -1,7 +1,7 @@
+from django.db.models import Count, Q
+
 
 # function to return the percentage of given parameter
-
-
 def get_percentage(*args, **kwargs):
     if args:
         total_marks = sum(args)
@@ -10,15 +10,13 @@ def get_percentage(*args, **kwargs):
     else:
         return 0
     
+# find the average parameter is list
 def get_average(numbers:list)->float:
     if not numbers:
         return 0
     return sum(numbers)/len(numbers)
 
 
-
-
-from django.db.models import Count, Q
 
 def teacher_analysis(db):
     """function to return the performance statics of each teacher 
@@ -57,7 +55,7 @@ def teacher_analysis(db):
             'success_rate': round(success_rate, 2)
         })
     
-    # Counting the number of passed students for best teacher calculation
+    # Counting number of passed students
     passed_students = db.objects.filter(passing_criteria)
     
     # Calculate top 10 students per teacher based on gained marks
@@ -88,5 +86,5 @@ def teacher_analysis(db):
             'top_10_count': best_teacher[1]['top_count']
         },
         'teacher_reports': report
-        
     }
+

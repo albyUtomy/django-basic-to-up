@@ -7,12 +7,12 @@ from django.db import IntegrityError
 from utils.utils import get_average, teacher_analysis
 
 from .models import Student_Progress
-from django.db.models import Q
+from django.db.models import Q, Avg
 from .serializers import *
 
 class StudentCrudOperation(APIView):
 
-    """to enter students data single and bulk"""
+    """to enter students data single entity and multiple entity"""
     def post(self, request, *args, **kwargs):
         serialize = StudentProcessSerializer(data = request.data, many=True)
         if serialize.is_valid():
@@ -22,7 +22,6 @@ class StudentCrudOperation(APIView):
             except IntegrityError as e:
                 return Response({'error':'Student Roll Number Already Exist'}, status=HTTP_400_BAD_REQUEST)
             except Exception as e:
-                # Handle any other unforeseen errors
                 return Response({'error':'An error occurred while saving', 'details':str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             return Response(serialize.errors, status=HTTP_400_BAD_REQUEST)
@@ -63,6 +62,46 @@ class StudentModification(APIView):
             return Response({'error':'An error occurred while retrieving data from the server', 'details':str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
         
 
+    # # update the details using roll number
+    # def put(self, request, roll_no):
+    #     try:
+    #         student = Student_Progress.objects.get(roll_no=roll_no)
+    #     except Student_Progress.DoesNotExist:
+    #         return Response({"error": "Data Not Found"}, status=HTTP_404_NOT_FOUND)
+
+    #     serialize = StudentProcessSerializer(student, data=request.data)
+
+    #     if serialize.is_valid():
+    #         new_roll = serialize.validated_data.get('roll_no', roll_no)  # Fetch new roll number
+
+    #         # Check if the new roll number is different
+    #         if new_roll != roll_no:
+    #             # Check if a student with the new roll number already exists
+    #             if Student_Progress.objects.filter(roll_no=new_roll).exists():
+    #                 return Response({'error': "Roll number already exists"}, status=HTTP_400_BAD_REQUEST)
+                
+    #             """
+    #             Delete the old student record before saving only if the roll id different
+    #             Create a new student record with the updated roll number
+    #             Copy validated data
+    #             Set the new roll number
+    #             """
+                 
+    #             student.delete()
+    #             new_student_data = serialize.validated_data.copy()
+    #             new_student_data['roll_no'] = new_roll 
+
+    #             """Create and save the new student instance"""
+    #             new_student = Student_Progress(**new_student_data)
+    #             new_student.save()
+    #             return Response(StudentProcessSerializer(new_student).data, status=HTTP_201_CREATED)  # 201 Created for new entry
+    #         else:
+    #             serialize.save()
+    #             return Response(serialize.data, status=HTTP_200_OK)
+    #     else:
+    #         return Response(serialize.errors, status=HTTP_400_BAD_REQUEST)
+
+
     # update the details using roll number
     def put(self, request, roll_no):
         try:
@@ -70,38 +109,18 @@ class StudentModification(APIView):
         except Student_Progress.DoesNotExist:
             return Response({"error": "Data Not Found"}, status=HTTP_404_NOT_FOUND)
 
-        serialize = StudentProcessSerializer(student, data=request.data)
+        # Exclude roll_no from the request data
+        request_data = request.data.copy()
+        if 'roll_no' in request_data:
+            request_data.pop('roll_no')  # Remove roll_no from update data
 
-        if serialize.is_valid():
-            new_roll = serialize.validated_data.get('roll_no', roll_no)  # Fetch new roll number
+        serializer = StudentProcessSerializer(student, data=request_data)
 
-            # Check if the new roll number is different
-            if new_roll != roll_no:
-                # Check if a student with the new roll number already exists
-                if Student_Progress.objects.filter(roll_no=new_roll).exists():
-                    return Response({'error': "Roll number already exists"}, status=HTTP_400_BAD_REQUEST)
-
-
-                """
-                Delete the old student record before saving only if the roll id diffrnt
-                Create a new student record with the updated roll number
-                Copy validated data
-                Set the new roll number
-                """
-    
-                student.delete()
-                new_student_data = serialize.validated_data.copy()
-                new_student_data['roll_no'] = new_roll 
-
-                """Create and save the new student instance"""
-                new_student = Student_Progress(**new_student_data)
-                new_student.save()
-                return Response(StudentProcessSerializer(new_student).data, status=HTTP_201_CREATED)  # 201 Created for new entry
-            else:
-                serialize.save()
-                return Response(serialize.data, status=HTTP_200_OK)
+        if serializer.is_valid():
+            serializer.save()  # Save changes to the existing student instance
+            return Response(serializer.data, status=HTTP_200_OK)
         else:
-            return Response(serialize.errors, status=HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
 
     # delete a student details using roll number
@@ -133,7 +152,6 @@ class StudentSortedBy(APIView):
             chemistry_mark = [{'name':student['name'], 'roll_no':student['roll_no'], 'chemistry_mark':student['chemistry_mark']} for student in serialize.data]
             return Response(chemistry_mark,status=HTTP_200_OK)
         
-
         elif subject== 'maths':
             list_maths_mark = Student_Progress.objects.exclude(maths_mark = None)
             serialize = CombinedMarksSerializer(list_maths_mark, many=True)
@@ -164,71 +182,60 @@ class SortByTeacher(APIView):
 
 class StudentMarkStatistic(APIView):
     def get(self, request, filtration=None):
-        if filtration == 'average-marks' in request.path:
             try:
-                # Fetching marks from the database
-                physics_marks = list(Student_Progress.objects.values_list('physics_mark', flat=True))
-                maths_marks = list(Student_Progress.objects.values_list('maths_mark', flat=True))
-                chemistry_marks = list(Student_Progress.objects.values_list('chemistry_mark', flat=True))
-                gained_marks = list(Student_Progress.objects.values_list('gained_mark', flat=True))
-                percentage = list(Student_Progress.objects.values_list('percentage', flat=True))
+                if filtration == 'average-marks' in request.path:
+                    try:
 
-                # Calculating averages
-                avg_data = {
-                    "average_chemistry_mark": get_average(chemistry_marks),
-                    "average_physics_mark": get_average(physics_marks),
-                    "average_maths_mark": get_average(maths_marks),
-                    "average_gained_total":get_average(gained_marks),
-                    "average_percentage": get_average(percentage)
-                }
+                        # Fetching marks from the database
+                        avg_data = Student_Progress.objects.aggregate(
+                        average_chemistry_mark=Avg('chemistry_mark'),
+                        average_physics_mark=Avg('physics_mark'),
+                        average_maths_mark=Avg('maths_mark'),
+                        average_gained_total=Avg('gained_mark'),
+                        average_percentage=Avg('percentage')
+                    )
+                        # Return the response with the aggregated data
+                        return Response({'average': avg_data}, status=HTTP_200_OK)
+                    except:
+                        return Response({"error":"Statistics not found"}, status=HTTP_400_BAD_REQUEST)
 
-                return Response({'average': avg_data}, status=HTTP_200_OK)
-
-            except Exception as e:
-                return Response({
-                    "error": "An error occurred while fetching averages.",
-                    "details": str(e)
-                }, status=HTTP_500_INTERNAL_SERVER_ERROR)
-        
-        elif filtration == 'report-failed':
-            try:
-                students= Student_Progress.objects.all()
-                failed_students = students.filter(
-                Q(chemistry_mark__lt=40) | 
-                Q(physics_mark__lt=40) | 
-                Q(maths_mark__lt=40)
-                
-            )
-                serialize = CombinedMarksSerializer(failed_students, many=True)
-                return Response({
-                    'failed_students': serialize.data
-                    }, status=HTTP_200_OK)
             
-            except Exception as e:
-                return Response({
-                'error': 'An error occurred while retrieving data failed students record.',
-                'details': str(e)
-            },status=HTTP_500_INTERNAL_SERVER_ERROR)
+                elif filtration == 'report-failed':
+                    try:
+                        students= Student_Progress.objects.all()
+                        failed_students = students.filter(
+                        Q(chemistry_mark__lt=40) | 
+                        Q(physics_mark__lt=40) | 
+                        Q(maths_mark__lt=40)
+                        
+                    )
+                        serialize = CombinedMarksSerializer(failed_students, many=True)
+                        return Response({
+                            'failed_students': serialize.data
+                            }, status=HTTP_200_OK)
+                    except:
+                        return Response({"error":"Failed Report is not found"}, status=HTTP_400_BAD_REQUEST)
 
-        
-        elif filtration == 'top5':
-            try:
-                top_students = Student_Progress.objects.filter(gained_mark__isnull=False).order_by('-gained_mark')[:5]
-                serialize = CombinedMarksSerializer(top_students, many=True)
-                return Response({'top_students': serialize.data}, status=HTTP_200_OK)
 
+                elif filtration == 'top5':
+                    try:
+                        top_students = Student_Progress.objects.filter(gained_mark__isnull=False).order_by('-gained_mark')[:5]
+                        serialize = CombinedMarksSerializer(top_students, many=True)
+                        return Response({'top_students': serialize.data}, status=HTTP_200_OK)
+                    except:
+                        return Response({"error":"Topers List is not found"}, status=HTTP_400_BAD_REQUEST)
+                        
+                    
+                elif filtration == 'teacher-analysis':
+                    try:
+                        analysis_result = teacher_analysis(Student_Progress)
+                        return Response(analysis_result, status=HTTP_200_OK)
+                    except analysis_result.DoesNotExist:
+                        return Response({"error":"Teacher Analysis Report is not found"}, status=HTTP_400_BAD_REQUEST)
+                        
+                    
             except Exception as e:
-                return Response({
-                    'error': 'An error occurred while retrieving data.',
-                    'details': str(e)
-                }, status=HTTP_500_INTERNAL_SERVER_ERROR)
-            
-        elif filtration == 'teacher-analysis':
-            try:
-                analysis_result = teacher_analysis(Student_Progress)
-                return Response(analysis_result, status=HTTP_200_OK)
-            except Exception as e:
-                return Response({
-                    'error': 'An error occurred while retrieving the analysis',
-                    'details': str(e)
-                }, status=HTTP_500_INTERNAL_SERVER_ERROR)
+                        return Response({
+                            'error': 'An error occurred while retrieving the analysis',
+                            'details': str(e)
+                        }, status=HTTP_500_INTERNAL_SERVER_ERROR)
