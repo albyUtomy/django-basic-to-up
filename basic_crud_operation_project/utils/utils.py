@@ -87,4 +87,3 @@ def teacher_analysis(db):
         },
         'teacher_reports': report
     }
-

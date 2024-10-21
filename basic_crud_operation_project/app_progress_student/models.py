@@ -4,7 +4,7 @@ from utils.utils import get_percentage
 
 # Create your models here.
 class Student_Progress(models.Model):
-    roll_no = models.AutoField(primary_key=True, auto_created=True, editable=False)
+    roll_no = models.AutoField(primary_key=True, editable=False)
     name = models.CharField(max_length=50)
     chemistry_mark = models.FloatField(blank=True, validators=[MinValueValidator(0.0), MaxValueValidator(100.0)])
     physics_mark = models.FloatField(blank=True, validators=[MinValueValidator(0.0), MaxValueValidator(100.0)])
