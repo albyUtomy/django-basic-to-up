@@ -12,10 +12,25 @@ This project is a Django-based web application designed to manage student progre
   - [API Endpoints](#api-endpoints)
 
 ## Features
-- Create, Read, Update, and Delete (CRUD) operations for student records.
-- Filter students by subject marks.
-- Sort students by their class teacher.
-- Generate statistics on average marks based on various filters.
+
+- **CRUD Operations**: 
+  - Add new students, retrieve the list of students, update existing student information, and delete student records.
+  
+- **Filter Students by Subject Marks**: 
+  - Retrieve students sorted by their marks in specific subjects like chemistry, physics, and maths.
+  
+- **Sort Students by Class Teacher**: 
+  - View students assigned to a specific class teacher.
+  
+- **Student Statistics**: 
+  - Generate various reports:
+    - Average marks of students.
+    - List of students who have failed.
+    - Top 5 students based on marks.
+    - Analyze student performance by teacher.
+    
+- **Admin Panel**:
+  - Manage student records and related data through the Django admin interface.
 
 ## Technologies Used
 - Python
