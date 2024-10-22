@@ -11,8 +11,8 @@ class Student_Progress(models.Model):
     maths_mark = models.FloatField(blank=True, validators=[MinValueValidator(0.0), MaxValueValidator(100.0)])
     out_off = models.IntegerField(blank=True, null=True,default=300, editable=False)
     gained_mark = models.FloatField(blank=True, null=True, editable=False)
-    class_teacher = models.CharField(max_length=50)
     percentage = models.FloatField(editable=False, blank=True, null=True)
+    class_teacher_id = models.ForeignKey('Teacher', on_delete=models.DO_NOTHING, null=True, blank=True)
 
 
     def save(self, *args, **kwargs):
@@ -29,3 +29,12 @@ class Student_Progress(models.Model):
     
     def __str__(self):
         return f"{self.name} ({self.roll_no})"
+    
+
+class Teacher(models.Model):
+    name = models.CharField(max_length=50)
+    employee_id = models.IntegerField(primary_key=True, editable=False)
+    performance_rate = models.FloatField(blank=True, editable=True, null=True,)
+
+    def __str__(self):
+        return f"{self.name} id : {self.employee_id}"

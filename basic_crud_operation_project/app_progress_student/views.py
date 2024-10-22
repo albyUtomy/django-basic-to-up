@@ -133,12 +133,14 @@ class StudentSortedBy(APIView):
             physics_mark = [{'name':student['name'], 'roll_no':student['roll_no'], 'physics_mark':student['physics_mark']} for student in serialize.data]
             return Response(physics_mark,status=HTTP_200_OK)
         
+
 # Sort by class teacher
 class SortByTeacher(APIView):
-    def get(self, request, teacher_name=None):
+    def get(self, request, teacher_name):
         try:
-            teacher_name = Student_Progress.objects.filter(class_teacher=teacher_name)
-            serialize = TeacherSortSerializer(teacher_name, many=True)
+            teacher_name = Teacher.objects.get(name=teacher_name)
+            students = Student_Progress.objects.filter(class_teacher_id = teacher_name)
+            serialize = StudentProcessSerializer(students, many =True)
             return Response(serialize.data, status=HTTP_200_OK)
         except Student_Progress.DoesNotExist:
             return Response({'error':'Not Found'}, status=HTTP_400_BAD_REQUEST)
@@ -189,19 +191,56 @@ class StudentMarkStatistic(APIView):
                         serialize = CombinedMarksSerializer(top_students, many=True)
                         return Response({'top_students': serialize.data}, status=HTTP_200_OK)
                     except:
-                        return Response({"error":"Topers List is not found"}, status=HTTP_400_BAD_REQUEST)
-                        
+                        return Response({"error":"Topers List is not found"}, status=HTTP_400_BAD_REQUEST)  
                     
-                elif filtration == 'teacher-analysis':
+                elif filtration == 'best_teacher':
                     try:
-                        analysis_result = teacher_analysis(Student_Progress)
-                        return Response(analysis_result, status=HTTP_200_OK)
-                    except analysis_result.DoesNotExist:
-                        return Response({"error":"Teacher Analysis Report is not found"}, status=HTTP_400_BAD_REQUEST)
+                        # Get the best teacher based on performance_rate
+                        best_teacher = Teacher.objects.order_by('-performance_rate').first()
                         
-                    
+                        if best_teacher:
+                            # Serialize the best teacher
+                            serialized_teacher = TeacherSerializer(best_teacher)
+                            return Response({'best_teacher': serialized_teacher.data}, status=200)
+                    except:
+                        return Response({'message': 'No teachers found.'}, status=404)
+
+
+
+
+
+
+
+
+
+
             except Exception as e:
                         return Response({
                             'error': 'An error occurred while retrieving the analysis',
                             'details': str(e)
                         }, status=HTTP_500_INTERNAL_SERVER_ERROR)
+            
+class TeacherAnalysis(APIView):
+    def get(self, request, teacher_name=None):
+        try:
+            if teacher_name:
+                teacher = Teacher.objects.get(name=teacher_name)
+                students = Student_Progress.objects.filter(class_teacher_id = teacher.employee_id)
+                top_10_queryset = Student_Progress.objects.filter(gained_mark__isnull=False).order_by('-gained_mark')
+                top_10_list = list(top_10_queryset[:10])
+
+                analysis = teacher_analysis(students, top_10_list)
+                return Response({'analysis': analysis}, status=HTTP_200_OK)
+            
+            # else if no teacher_name it will fetch the data from Teacher model
+            # only with the performance rate
+            else:
+                teachers = Teacher.objects.all()
+                serialized_teachers = TeacherSerializer(teachers, many=True).data
+                
+                return Response(serialized_teachers, status=HTTP_200_OK)
+        
+        except Teacher.DoesNotExist:
+            return Response({'error': 'Teacher not found'}, status=HTTP_404_NOT_FOUND)
+        except Exception as e:
+             return Response({'error': 'An error occurred while retrieving data from the server', 'details': str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)

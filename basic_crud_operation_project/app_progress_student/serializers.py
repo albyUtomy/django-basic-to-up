@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Student_Progress
+from .models import Student_Progress, Teacher
 
 class StudentProcessSerializer(serializers.ModelSerializer):
     class Meta:
@@ -7,7 +7,6 @@ class StudentProcessSerializer(serializers.ModelSerializer):
         fields = [
                     'roll_no',
                     'name',
-                    'class_teacher',
                     'percentage',
                     'gained_mark',
                     'out_off',
@@ -54,7 +53,7 @@ class CombinedMarksSerializer(serializers.ModelSerializer):
         fields = ['name', 'roll_no', 'chemistry_mark', 'physics_mark', 'maths_mark', 'gained_mark','percentage']
 
 
-class TeacherSortSerializer(serializers.ModelSerializer):
+class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Student_Progress
-        fields = ['class_teacher','name', 'roll_no', 'percentage', 'gained_mark']
+        model = Teacher
+        fields = ['name', 'employee_id','performance_rate']

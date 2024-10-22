@@ -1,6 +1,6 @@
 
 from django.urls import path, include
-from .views import StudentCrudOperation,SortByTeacher,StudentMarkStatistic, StudentModification, StudentSortedBy
+from .views import TeacherAnalysis, StudentCrudOperation,SortByTeacher,StudentMarkStatistic, StudentModification, StudentSortedBy
 
 urlpatterns = [
     path('', StudentCrudOperation.as_view(), name="list_students"), #post() delete() get() to handle multiple entities,
@@ -8,4 +8,6 @@ urlpatterns = [
     path('subject/<str:subject>/', StudentSortedBy.as_view(), name="subject-marks"), #chemistry/, physics/, maths/,
     path('class_teacher/<str:teacher_name>/', SortByTeacher.as_view(), name="class_teacher"), 
     path('statics/<str:filtration>/', StudentMarkStatistic.as_view(), name="average_marks"), #average-marks/, report-failed/, top5/, teacher-analysis/
-]
+    path('teacher-report/',TeacherAnalysis.as_view(), name="teachers-report"),
+    path('teacher-report/<str:teacher_name>/',TeacherAnalysis.as_view(), name="teacher-report"),
+    ]
