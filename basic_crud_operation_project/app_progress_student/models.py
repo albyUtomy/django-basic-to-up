@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from utils.utils import get_percentage
+from utils.utils import get_percentage, teacher_analysis
 
 # Create your models here.
 class Student_Progress(models.Model):
@@ -34,7 +34,14 @@ class Student_Progress(models.Model):
 class Teacher(models.Model):
     name = models.CharField(max_length=50)
     employee_id = models.IntegerField(primary_key=True, editable=False)
-    performance_rate = models.FloatField(blank=True, editable=True, null=True,)
+    performance_rate = models.FloatField(blank=True, editable=False, null=True,)
 
     def __str__(self):
         return f"{self.name} id : {self.employee_id}"
+    
+    def save(self, *args, **kwargs):
+        student_data = Student_Progress.objects.filter(class_teacher_id=self.employee_id)
+        top_10 = Student_Progress.objects.order_by('-gained_mark')[:10]
+        performance_data = teacher_analysis(self, student_data, top_10)
+        self.performance_rate = performance_data['performance_rate_out_of_10']        
+        super(Teacher, self).save(*args, **kwargs)

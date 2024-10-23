@@ -1,14 +1,19 @@
 from django.shortcuts import render
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
-from django.db import IntegrityError
 
 from utils.utils import teacher_analysis
 
 from .models import Student_Progress
 from django.db.models import Q, Avg
+from django.db.models import F
+from django.db import IntegrityError
+
 from .serializers import *
+
+
 
 class StudentCrudOperation(APIView):
 
@@ -65,27 +70,19 @@ class StudentModification(APIView):
     # update the details using roll number
     def put(self, request, roll_no):
         try:
-            # Fetch the student using roll_no
+        # Get the student object based on the roll number
             student = Student_Progress.objects.get(roll_no=roll_no)
         except Student_Progress.DoesNotExist:
-            return Response({"error": "Student not found."}, status=HTTP_404_NOT_FOUND)
+            return Response({'error': 'Student not found'}, status=HTTP_404_NOT_FOUND)
 
-        # Get the data from the request
-        data = request.data.copy()
-
-        # Check if 'roll_no' is in the request data
-        if 'roll_no' in data:
-            return Response({"error": "Roll number cannot be edited."}, status=HTTP_400_BAD_REQUEST)
-
-        # Partial update - only update the fields provided in the request
-        serializer = StudentProcessSerializer(student, data=data, partial=True)
-
+        # Deserialize the request data and update the student instance
+        serializer = StudentProcessSerializer(student, data=request.data, partial=True)
+        
+        # Validate and save the updated data
         if serializer.is_valid():
-            serializer.save()  # Save the changes
+            serializer.save()
             return Response(serializer.data, status=HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
-
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
 
 
@@ -136,12 +133,23 @@ class StudentSortedBy(APIView):
 
 # Sort by class teacher
 class SortByTeacher(APIView):
-    def get(self, request, teacher_name):
+    def get(self, request, teacher_name=None):
         try:
-            teacher_name = Teacher.objects.get(name=teacher_name)
-            students = Student_Progress.objects.filter(class_teacher_id = teacher_name)
-            serialize = StudentProcessSerializer(students, many =True)
-            return Response(serialize.data, status=HTTP_200_OK)
+            if teacher_name:
+                teacher_name = Teacher.objects.get(name=teacher_name)
+                students = Student_Progress.objects.filter(class_teacher_id = teacher_name)
+                serialize = StudentProcessSerializer(students, many =True)
+
+                return Response(serialize.data, status=HTTP_200_OK)
+            else:
+                teacher_name = Teacher.objects.first().name
+                students = Student_Progress.objects.annotate(
+                    teacher_name=F('class_teacher_id__name')
+                ).order_by('teacher_name', 'roll_no')
+                serialize = StudentProcessSerializer(students, many =True)
+                return Response(serialize.data, status=HTTP_200_OK)
+
+
         except Student_Progress.DoesNotExist:
             return Response({'error':'Not Found'}, status=HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -204,15 +212,6 @@ class StudentMarkStatistic(APIView):
                             return Response({'best_teacher': serialized_teacher.data}, status=200)
                     except:
                         return Response({'message': 'No teachers found.'}, status=404)
-
-
-
-
-
-
-
-
-
 
             except Exception as e:
                         return Response({
