@@ -8,8 +8,8 @@ class School(models.Model):
     name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
 
-    # created_at = models.DateTimeField(auto_now_add=True)
-    created_at = models.DateTimeField(default=timezone.now())
+    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(default=timezone.now())
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):

@@ -54,7 +54,10 @@ class PhysicsMarkSerializer(serializers.ModelSerializer):
 class MathsMarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student_Progress
-        fields = ['name','roll_no', 'maths_mark']"""
+        fields = ['name','roll_no', 'maths_mark']
+
+        
+"""
 
 
 """

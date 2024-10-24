@@ -45,8 +45,8 @@ class Teacher(models.Model):
     performance_rate = models.FloatField(blank=True, editable=False, null=True,)
 
     
-    # created_at = models.DateTimeField(auto_now_add=True)
-    created_at = models.DateTimeField(default=timezone.now())
+    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(default=timezone.now())
     updated_at = models.DateTimeField(auto_now=True)
 
     department_id = models.ForeignKey('app_department.Department', on_delete=models.DO_NOTHING, null=True, blank=True, related_name='teachers')

@@ -9,8 +9,8 @@ class Department(models.Model):
     hod_name = models.ForeignKey('app_progress_student.Teacher', on_delete=models.DO_NOTHING, null=True, blank=True, related_name='departments')
     school_id = models.ForeignKey('app_school.School', on_delete=models.DO_NOTHING, null=True, blank=True, related_name='school_department')
     
-    created_at = models.DateTimeField(default=timezone.now())
-    # created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(default=timezone.now())
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
