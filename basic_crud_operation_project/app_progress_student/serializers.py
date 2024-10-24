@@ -27,7 +27,9 @@ class StudentProcessSerializer(serializers.ModelSerializer):
                     'physics_mark',
                     'maths_mark',
                     'class_teacher_id',
-                    'class_teacher'
+                    'class_teacher',
+                    'created_at',
+                    'updated_at'
                 ]
         
         read_only_fields = ['roll_no','percentage', 'gained_mark', 'out_off']

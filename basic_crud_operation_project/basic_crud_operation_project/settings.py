@@ -32,6 +32,9 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'app_progress_student',
+    'app_teacher',
+    'app_department',
+    'app_school',
     'rest_framework',
     'django_extensions',
     'django.contrib.admin',

@@ -8,6 +8,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('app_progress_student', '0005_remove_student_progress_class_teacher'),
     ]
+    
 
     operations = [
         migrations.AddField(

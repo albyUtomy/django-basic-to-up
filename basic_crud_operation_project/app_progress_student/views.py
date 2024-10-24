@@ -219,6 +219,8 @@ class StudentMarkStatistic(APIView):
                             'details': str(e)
                         }, status=HTTP_500_INTERNAL_SERVER_ERROR)
             
+            
+            
 class TeacherAnalysis(APIView):
     def get(self, request, teacher_name=None):
         try:
