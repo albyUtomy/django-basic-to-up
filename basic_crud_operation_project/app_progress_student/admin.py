@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student_Progress, Teacher
+from .models import Student_Progress
 
 
 # Register your models here.
@@ -10,7 +10,3 @@ class StudentProgressAdmin(admin.ModelAdmin):
 
 admin.site.register(Student_Progress, StudentProgressAdmin)
 
-class TeacherAdmin(admin.ModelAdmin):
-    list_display = ('employee_id', 'name', 'performance_rate')
-
-admin.site.register(Teacher,TeacherAdmin)

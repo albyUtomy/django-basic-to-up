@@ -1,7 +1,7 @@
 from django.urls import path
-# from .views import DepartmentCrud
+from .views import SchoolCrud
 
 
 urlpatterns = [
-    # path('', DepartmentCrud.as_view, name="department-crud"),
+    path('', SchoolCrud.as_view(), name="school-crud"),
     ]

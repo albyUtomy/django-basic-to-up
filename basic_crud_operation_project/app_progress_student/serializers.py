@@ -1,19 +1,29 @@
 from rest_framework import serializers
-from .models import Student_Progress, Teacher
+
+# importing required serializers and models from imports
+# from imports.models import  Teacher, Department, School
+# from .models import Student_Progress
 
 
+from app_department.models import Department
+from app_teacher.models import Teacher
+from app_school.models import School
+from app_progress_student.models import Student_Progress
 
-class TeacherSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Teacher
-        fields = ['name', 'employee_id','performance_rate']
-
-
+from app_teacher.serializers import TeacherSerializer
+from app_school.serializers import SchoolSerializer
+from app_department.serializers import DepartmentSerializer
 
 class StudentProcessSerializer(serializers.ModelSerializer):
     class_teacher_id = serializers.PrimaryKeyRelatedField(queryset=Teacher.objects.all(), write_only=True, required=False)
-    class_teacher = TeacherSerializer(source='class_teacher_id',read_only=True)
+    # class_teacher = serializers.SerializerMethodField()
+    class_teacher = TeacherSerializer(source='class_teacher_id', read_only=True)
+
+    department_id = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all(), write_only=True, required=False)
+    department_details = DepartmentSerializer(source='department_id', read_only=True)
+
+    school_id = serializers.PrimaryKeyRelatedField(queryset=School.objects.all(), write_only=True, required=False)
+    school_details = SchoolSerializer(source='school_id', read_only=True)
 
     class Meta:
         model = Student_Progress
@@ -28,14 +38,25 @@ class StudentProcessSerializer(serializers.ModelSerializer):
                     'maths_mark',
                     'class_teacher_id',
                     'class_teacher',
+                    'school_id',
+                    'school_details',
+                    'department_id',
+                    'department_details',
                     'created_at',
-                    'updated_at'
+                    'updated_at',
+                    
                 ]
         
         read_only_fields = ['roll_no','percentage', 'gained_mark', 'out_off']
 
+    # def get_class_teacher(self, obj):
+    #     from imports.serializers import TeacherSerializer
+    #     return TeacherSerializer(obj.class_teacher_id).data
+
     def create(self, validated_data):
         return Student_Progress.objects.create(**validated_data)
+    
+    
     
 
 """
