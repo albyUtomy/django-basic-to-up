@@ -4,6 +4,6 @@ from .models import Teacher
 # Register your models here.
 
 class TeacherAdmin(admin.ModelAdmin):
-    list_display = ('employee_id', 'name', 'performance_rate')
+    list_display = ('teacher_id', 'name', 'performance_rate')
 
 admin.site.register(Teacher, TeacherAdmin)

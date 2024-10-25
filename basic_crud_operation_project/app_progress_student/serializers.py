@@ -10,20 +10,20 @@ from app_teacher.models import Teacher
 from app_school.models import School
 from app_progress_student.models import Student_Progress
 
-from app_teacher.serializers import TeacherSerializer
-from app_school.serializers import SchoolSerializer
-from app_department.serializers import DepartmentSerializer
+# from app_teacher.serializers import TeacherSerializer
+# from app_school.serializers import SchoolSerializer
+# from app_department.serializers import DepartmentSerializer
 
 class StudentProcessSerializer(serializers.ModelSerializer):
     class_teacher_id = serializers.PrimaryKeyRelatedField(queryset=Teacher.objects.all(), write_only=True, required=False)
     # class_teacher = serializers.SerializerMethodField()
-    class_teacher = TeacherSerializer(source='class_teacher_id', read_only=True)
+    class_teacher = serializers.StringRelatedField(source='class_teacher_id', read_only=True)
 
     department_id = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all(), write_only=True, required=False)
-    department_details = DepartmentSerializer(source='department_id', read_only=True)
+    department_details = serializers.StringRelatedField(source='department_id', read_only=True)
 
     school_id = serializers.PrimaryKeyRelatedField(queryset=School.objects.all(), write_only=True, required=False)
-    school_details = SchoolSerializer(source='school_id', read_only=True)
+    school_details = serializers.StringRelatedField(source='school_id', read_only=True)
 
     class Meta:
         model = Student_Progress

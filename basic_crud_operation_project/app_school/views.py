@@ -3,6 +3,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import generics
 
 # Create your views here.
 from .models import School
@@ -24,15 +25,28 @@ class SchoolCrud(APIView):
         except Exception as e:
             logger.error(f"Error creating school: {e}" )
             return Response({'message':str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
-    def get(self, request):
-        try:
-            school = School.objects.all()
-            serializer = SchoolSerializer(school, many=True)
-
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        except School.DoesNotExist:
-            return Response({'error':'Schools data is not found'}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({'error':str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+            
+#     def get(self, request):
+#         try:
+#             school = School.objects.all()
+#             serializer = SchoolSerializer(school, many=True)
+
+#             return Response(serializer.data,status=status.HTTP_200_OK)
+#         except School.DoesNotExist:
+#             return Response({'error':'Schools data is not found'}, status=status.HTTP_404_NOT_FOUND)
+#         except Exception as e:
+#             return Response({'error':str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class SchoolUpdateRetrieveView(generics.RetrieveUpdateDestroyAPIView):
+    """retrieve, update, delete by id
+    """
+    queryset = School.objects.all()
+    serializer_class = SchoolSerializer
+    lookup_field = 'school_id'
+
+    def update(self, request, *args, **kwargs):
+        kwargs['partial'] = True 
+        return super().update(request, *args, **kwargs)
+    

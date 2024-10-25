@@ -3,6 +3,6 @@ from .models import School
 
 # Register your models here.
 class SchoolAdmin(admin.ModelAdmin):
-    list_display = ('school_id','school_name','address','principle_name')
+    list_display = ('school_id','school_name','address','principal_name')
 
 admin.site.register(School,SchoolAdmin)

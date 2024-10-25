@@ -67,3 +67,7 @@ def teacher_analysis(student_data, top_10):
     }
 
     return analysis
+
+def get_best_value(model, field_name):
+    highest = model.objects.order_by(f'-{field_name}').first()
+    return highest

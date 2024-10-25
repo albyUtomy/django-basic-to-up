@@ -7,7 +7,7 @@ class School(models.Model):
     school_id = models.AutoField(primary_key=True)
     school_name = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
-    principle_name = models.CharField(max_length=50)
+    principal_name = models.CharField(max_length=50)
 
     created_at = models.DateTimeField(auto_now_add=True)
     # created_at = models.DateTimeField(default=timezone.now())
