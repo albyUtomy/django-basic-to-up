@@ -43,14 +43,17 @@ class StudentCrudOperation(APIView):
 
     """to delete all the students records"""
     def delete(self, request):
-        students = Student_Progress.objects.all()
+        try:
+            students = Student_Progress.objects.all()
 
-        # Checking  if there are records to delete
-        if students.exists():
-            students.delete()
-            return Response({"message": "All student records deleted successfully!"}, status=HTTP_200_OK)
-        else:
-            return Response({"error": "No records found to delete!"}, status=HTTP_404_NOT_FOUND)
+            # Checking  if there are records to delete
+            if students.exists():
+                students.delete()
+                return Response({"message": "All student records deleted successfully!"}, status=HTTP_200_OK)
+        except Student_Progress.DoesNotExist:
+                return Response({"error": "No records found to delete!"}, status=HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error':str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
     
 
 
@@ -70,20 +73,19 @@ class StudentModification(APIView):
     # update the details using roll number
     def put(self, request, roll_no):
         try:
-        # Get the student object based on the roll number
             student = Student_Progress.objects.get(roll_no=roll_no)
+            serializer = StudentProcessSerializer(student, data=request.data, partial=True)
+            
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=HTTP_200_OK)
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+            
         except Student_Progress.DoesNotExist:
             return Response({'error': 'Student not found'}, status=HTTP_404_NOT_FOUND)
-
-        # Deserialize the request data and update the student instance
-        serializer = StudentProcessSerializer(student, data=request.data, partial=True)
+        except Exception as e:
+            return Response({'error':'An error occurred while retrieving data from the server', 'details':str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
         
-        # Validate and save the updated data
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=HTTP_200_OK)
-        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
-
 
 
     # delete a student details using roll number
@@ -132,28 +134,6 @@ class StudentSortedBy(APIView):
         
 
 # Sort by class teacher
-class SortByTeacher(APIView):
-    def get(self, request, teacher_name=None):
-        try:
-            if teacher_name:
-                teacher_name = Teacher.objects.get(name=teacher_name)
-                students = Student_Progress.objects.filter(class_teacher_id = teacher_name)
-                serialize = StudentProcessSerializer(students, many =True)
-
-                return Response(serialize.data, status=HTTP_200_OK)
-            else:
-                teacher_name = Teacher.objects.first().name
-                students = Student_Progress.objects.annotate(
-                    teacher_name=F('class_teacher_id__name')
-                ).order_by('teacher_name', 'roll_no')
-                serialize = StudentProcessSerializer(students, many =True)
-                return Response(serialize.data, status=HTTP_200_OK)
-
-
-        except Student_Progress.DoesNotExist:
-            return Response({'error':'Not Found'}, status=HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({'error':'An error occurred while retrieving data from the server', 'details':str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
         
 
 class StudentMarkStatistic(APIView):
@@ -201,17 +181,8 @@ class StudentMarkStatistic(APIView):
                     except:
                         return Response({"error":"Topers List is not found"}, status=HTTP_400_BAD_REQUEST)  
                     
-                elif filtration == 'best_teacher':
-                    try:
-                        # Get the best teacher based on performance_rate
-                        best_teacher = Teacher.objects.order_by('-performance_rate').first()
-                        
-                        if best_teacher:
-                            # Serialize the best teacher
-                            serialized_teacher = TeacherSerializer(best_teacher)
-                            return Response({'best_teacher': serialized_teacher.data}, status=200)
-                    except:
-                        return Response({'message': 'No teachers found.'}, status=404)
+                # elif filtration == 'best_teacher':
+                #     
 
             except Exception as e:
                         return Response({
@@ -221,27 +192,3 @@ class StudentMarkStatistic(APIView):
             
             
             
-class TeacherAnalysis(APIView):
-    def get(self, request, teacher_name=None):
-        try:
-            if teacher_name:
-                teacher = Teacher.objects.get(name=teacher_name)
-                students = Student_Progress.objects.filter(class_teacher_id = teacher.employee_id)
-                top_10_queryset = Student_Progress.objects.filter(gained_mark__isnull=False).order_by('-gained_mark')
-                top_10_list = list(top_10_queryset[:10])
-
-                analysis = teacher_analysis(students, top_10_list)
-                return Response({'analysis': analysis}, status=HTTP_200_OK)
-            
-            # else if no teacher_name it will fetch the data from Teacher model
-            # only with the performance rate
-            else:
-                teachers = Teacher.objects.all()
-                serialized_teachers = TeacherSerializer(teachers, many=True).data
-                
-                return Response(serialized_teachers, status=HTTP_200_OK)
-        
-        except Teacher.DoesNotExist:
-            return Response({'error': 'Teacher not found'}, status=HTTP_404_NOT_FOUND)
-        except Exception as e:
-             return Response({'error': 'An error occurred while retrieving data from the server', 'details': str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)

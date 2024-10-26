@@ -51,14 +51,7 @@ class Student_Progress(models.Model):
                 performance_data = teacher_analysis(student_data, top_10)
                 
                 teacher.performance_rate = performance_data.get('performance_rate_out_of_10', 0)
-                teacher.save()  # Save the updated teacher data
-
-                # Find the best performing teacher
-                best_teacher = Teacher.objects.order_by('-performance_rate').first()
-                if best_teacher and self.class_teacher_id.department_id:
-                    department = self.class_teacher_id.department_id
-                    department.hod_name = best_teacher
-                    department.save()  # Save the updated department data
+                teacher.save()
             except Exception as e:
                 # Log or handle any errors that occur during saving
                 print(f"Error updating teacher or department: {str(e)}")

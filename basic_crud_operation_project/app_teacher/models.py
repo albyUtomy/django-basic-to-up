@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
-from utils.utils import get_best_value
+# from utils.utils import get_best_value
+from django.db import transaction
 
 # Create your models here.
 
@@ -19,8 +20,14 @@ class Teacher(models.Model):
     school_id = models.ForeignKey('app_school.School', on_delete=models.SET_NULL, null=True, blank=True, related_name='teachers_app_teacher')
 
 
-    # def save(self, *args, **kwargs):
-    #     super(Teacher, self).save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            super().save(*args, **kwargs)
+
+            from utils.utils import assign_hod_name
+            if self.department_id:
+                # Pass the department instance to assign_hod_name
+                assign_hod_name(self.department_id, self)
         
 
 

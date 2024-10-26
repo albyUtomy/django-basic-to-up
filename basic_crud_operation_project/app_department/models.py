@@ -1,20 +1,29 @@
 from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 
-from utils.utils import get_best_value
+# from utils.utils import get_best_value
 # Create your models here.
 
 class Department(models.Model):
     department_id = models.AutoField(primary_key=True)
     department_name = models.CharField(max_length=255)
     
-    hod_name = models.ForeignKey('app_teacher.Teacher', on_delete=models.SET_NULL, null=True, blank=True, related_name='departments')
+    hod_name = models.OneToOneField('app_teacher.Teacher', on_delete=models.SET_NULL, null=True, blank=True, related_name='departments')
     school_id = models.ForeignKey('app_school.School', on_delete=models.SET_NULL, null=True, blank=True, related_name='school_department')
     
     # created_at = models.DateTimeField(default=timezone.now())
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        # Check if hod_name belongs to the same department
+        if self.hod_name and self.hod_name.department_id != self:
+            # raise ValidationError(f"The assigned HoD, {self.hod_name.name}, must belong to the {self.department_name} department.")
+            self.hod_name = None
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.department_name

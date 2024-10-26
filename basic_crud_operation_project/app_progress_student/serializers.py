@@ -42,8 +42,6 @@ class StudentProcessSerializer(serializers.ModelSerializer):
                     'school_details',
                     'department_id',
                     'department_details',
-                    'created_at',
-                    'updated_at',
                     
                 ]
         

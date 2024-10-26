@@ -68,6 +68,33 @@ def teacher_analysis(student_data, top_10):
 
     return analysis
 
-def get_best_value(model, field_name):
-    highest = model.objects.order_by(f'-{field_name}').first()
+def get_best_value(model):
+    highest = model.objects.order_by('-performance_rate').first()
+    print(highest)
     return highest
+
+def assign_hod_name(department_instance_in, teacher_instance):
+    """
+    Sets the highest-performing teacher as the head of department (`hod_name`).
+    Clears conflicting `hod_name` assignments from other departments.
+    """
+    
+    # Find the best-performing teacher in the department
+    best_teacher = teacher_instance.__class__.objects.filter(
+        department_id=department_instance_in
+    ).order_by('-performance_rate').first()
+
+    if best_teacher:
+        # Clear conflicting `hod_name` assignments from other departments
+        conflicting_departments = department_instance_in.__class__.objects.filter(
+            hod_name=best_teacher
+        ).exclude(pk=department_instance_in.pk)
+        
+        for conflict in conflicting_departments:
+            conflict.hod_name = None
+            conflict.save()
+
+        # Set the `hod_name` if it’s different from the current one
+        if department_instance_in.hod_name != best_teacher:
+            department_instance_in.hod_name = best_teacher
+            department_instance_in.save()  # Ensure the change is saved

@@ -13,4 +13,4 @@ class DepartmentSerializer(serializers.ModelSerializer):
     school_details = serializers.StringRelatedField(source = 'school_id',read_only=True)
     class Meta:
         model = Department
-        fields = ['department_id','department_name','hod_name','hod_details', 'school_id','school_details', 'created_at','updated_at']
+        fields = ['department_id','department_name','hod_name','hod_details', 'school_id','school_details']
