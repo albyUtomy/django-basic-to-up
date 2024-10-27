@@ -51,9 +51,29 @@ class StudentProcessSerializer(serializers.ModelSerializer):
     #     from imports.serializers import TeacherSerializer
     #     return TeacherSerializer(obj.class_teacher_id).data
 
-    def create(self, validated_data):
-        return Student_Progress.objects.create(**validated_data)
-    
+
+class StudentDetail(serializers.ModelSerializer):
+
+    class_teacher_id = serializers.PrimaryKeyRelatedField(queryset=Teacher.objects.all(), write_only=True, required=False)
+    # class_teacher = serializers.SerializerMethodField()
+    class_teacher = serializers.StringRelatedField(source='class_teacher_id', read_only=True)
+
+    department_id = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all(), write_only=True, required=False)
+    department_details = serializers.StringRelatedField(source='department_id', read_only=True)
+
+    class Meta:
+        model = Student_Progress
+        fields = [
+                    'roll_no',
+                    'name',
+                    'class_teacher_id',
+                    'class_teacher',
+                    'department_id',
+                    'department_details',
+                ]
+        
+        read_only_fields = ['roll_no']
+
     
     
 

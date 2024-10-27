@@ -10,3 +10,11 @@ class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teacher
         fields = ['teacher_id','name', 'performance_rate', 'department_id', 'department_name']
+
+
+class TeacherDetailsSerializer(serializers.ModelSerializer):
+    department_id = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all(), write_only=True, required=False)
+    department_name = serializers.StringRelatedField(source='department_id', read_only=True)
+    class Meta:
+        model = Teacher
+        fields = ['teacher_id','name', 'performance_rate', 'department_id', 'department_name']
