@@ -7,6 +7,70 @@ This API provides access to manage student progress, including their marks, assi
 http://<your-domain>/
 ```
 
+## End Points in this project
+# API Endpoints
+There are 24 endpoints in total for your project. Here’s the breakdown by section:
+
+* **Department API Endpoints: 5**
+* **School API Endpoints: 5**
+* **Teacher API Endpoints: 7**
+* **Student API Endpoints: 7**
+
+
+### School API Endpoints
+
+| Endpoint                                        | Method            | Description                                               |
+|-------------------------------------------------|-------------------|-----------------------------------------------------------|
+| `/api/school/`                                  | GET, POST         | Retrieve all schools or create a new school record.       |
+| `/api/school_details/<school_id>/`              | GET, PUT, DELETE  | Retrieve, update, or delete a school by ID.               |
+| `/api/school/departments/<school_id>`           | GET               | List departments within a specific school.                |
+| `/api/school/teachers/<school_id>`              | GET               | List teachers within a specific school.                   |
+| `/api/school/students/<school_id>`              | GET               | List students within a specific school.                   |
+
+---
+
+### Department API Endpoints
+
+| Endpoint                                       | Method            | Description                                   |
+|------------------------------------------------|-------------------|-----------------------------------------------|
+| `/api/department/`                             | GET, POST         | Retrieve all departments or create a new department. |
+| `/api/department/<department_id>/`             | GET, PUT, DELETE  | Retrieve, update, or delete a department by ID. |
+| `/api/department_filter/<department_id>/`      | GET               | Filter departments by department ID.               |
+| `/api/department_teacher/<department_id>/`     | GET               | Retrieve teachers under a specific department by ID. |
+| `/api/department_student/<department_id>/`     | GET               | Retrieve students under a specific department by ID. |
+
+---
+
+
+### Teacher API Endpoints
+
+| Endpoint                                         | Method            | Description                                               |
+|--------------------------------------------------|-------------------|-----------------------------------------------------------|
+| `/api/teacher/`                                  | GET, POST         | Retrieve all teachers or create a new teacher.            |
+| `/api/teacher/<teacher_id>/`                     | GET, PUT, DELETE  | Retrieve, update, or delete a teacher by ID.              |
+| `/api/teacher/sort_students/<teacher_name>/`     | GET               | Retrieve students taught by a specific teacher.           |
+| `/api/teacher/teacher_sort_a_z/`                 | GET               | Retrieve a list of teachers sorted alphabetically.        |
+| `/api/teacher/teacher_report/`                   | GET               | Generate a performance report for all teachers.           |
+| `/api/teacher/teacher_report/<teacher_name>/`    | GET               | Generate a performance report for a specific teacher.     |
+| `/api/teacher/best_teacher/`                     | GET               | Retrieve the best-performing teacher.                     |
+
+---
+
+### Student API Endpoints
+
+| Endpoint                                         | Method            | Description                                               |
+|--------------------------------------------------|-------------------|-----------------------------------------------------------|
+| `/api/students/`                                 | GET, POST         | Retrieve all students or create a new student record.     |
+| `/api/students/<student_id>/`                    | GET, PUT, DELETE  | Retrieve, update, or delete a student by ID.              |
+| `/api/students/subject/<subject>/`               | GET               | Retrieve students sorted by marks in a specific subject.  |
+| `/api/students/statics/<filtration>/`            | GET               | Retrieve statistics based on the specified filtration.    |
+
+
+
+
+
+# In Detailed
+
 ## Student API Endpoints
 
 | Endpoint                               | Method            | Description                                                                                                 |
