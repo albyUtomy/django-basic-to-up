@@ -1,6 +1,6 @@
 # School Management System API
 ## Overview
-This API provides access to manage student progress, including their marks, assigned teachers, departments, and school details. Authentication is required for all endpoints.
+This API provides access to manage student progress, including their marks, assigned teachers, departments, and school details. 
 
 ## Base URL
 ```url
