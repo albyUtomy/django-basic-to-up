@@ -63,7 +63,7 @@ There are 24 endpoints in total for your project. Here’s the breakdown by sect
 | `/api/students/`                                 | GET, POST         | Retrieve all students or create a new student record.     |
 | `/api/students/<student_id>/`                    | GET, PUT, DELETE  | Retrieve, update, or delete a student by ID.              |
 | `/api/students/subject/<subject>/`               | GET               | Retrieve students sorted by marks in a specific subject.  |
-| `/api/students/statics/<filtration>/`            | GET               | Retrieve statistics based on the specified filtration.    |
+| `/api/students/statics/<filtration>/`            | GET               | Retrieve statistics based on the specified filtration average-marks/, report-failed/, top5/.    |
 
 
 
