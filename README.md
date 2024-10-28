@@ -3,7 +3,7 @@
 This project is a Django-based web application designed to manage student progress, including CRUD operations, sorting by teacher, and generating statistics on student marks.
 
 ## Table of Contents
-- [Student Progress Management System](#student-progress-management-system)
+  - [Student Progress Management System](#student-progress-management-system)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Technologies Used](#technologies-used)
