@@ -494,3 +494,14 @@ Student_Progress
 - **Response**:
   - **Status 200**: Returns a list of students for the school.
   - **Status 404**: If no students are found for the school.
+
+## Model
+### School Model Fields
+
+| Field         | Type      | Description                                    |
+|---------------|-----------|------------------------------------------------|
+| `school_id`   | Integer   | Unique identifier for each school (primary key). |
+| `name`        | String    | Name of the school.                            |
+| `address`     | String    | Address of the school.                         |
+| `created_at`  | DateTime  | Timestamp of record creation.                  |
+| `updated_at`  | DateTime  | Timestamp of last update.                      |
