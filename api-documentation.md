@@ -21,11 +21,11 @@ There are 24 endpoints in total for your project. Here’s the breakdown by sect
 
 | Endpoint                                        | Method            | Description                                               |
 |-------------------------------------------------|-------------------|-----------------------------------------------------------|
-| `/api/school/`                                  | GET, POST         | Retrieve all schools or create a new school record.       |
-| `/api/school_details/<school_id>/`              | GET, PUT, DELETE  | Retrieve, update, or delete a school by ID.               |
-| `/api/school/departments/<school_id>`           | GET               | List departments within a specific school.                |
-| `/api/school/teachers/<school_id>`              | GET               | List teachers within a specific school.                   |
-| `/api/school/students/<school_id>`              | GET               | List students within a specific school.                   |
+| `/app_schools/school/`                                  | GET, POST         | Retrieve all schools or create a new school record.       |
+| `/app_schools/school_details/<school_id>/`              | GET, PUT, DELETE  | Retrieve, update, or delete a school by ID.               |
+| `/app_schools/school/departments/<school_id>`           | GET               | List departments within a specific school.                |
+| `/app_school/school/teachers/<school_id>`              | GET               | List teachers within a specific school.                   |
+| `/app_schools/school/students/<school_id>`              | GET               | List students within a specific school.                   |
 
 ---
 
@@ -33,11 +33,11 @@ There are 24 endpoints in total for your project. Here’s the breakdown by sect
 
 | Endpoint                                       | Method            | Description                                   |
 |------------------------------------------------|-------------------|-----------------------------------------------|
-| `/api/department/`                             | GET, POST         | Retrieve all departments or create a new department. |
-| `/api/department/<department_id>/`             | GET, PUT, DELETE  | Retrieve, update, or delete a department by ID. |
+| `/app_departments/department/`                             | GET, POST         | Retrieve all departments or create a new department. |
+| `/app_departments/department/<department_id>/`             | GET, PUT, DELETE  | Retrieve, update, or delete a department by ID. |
 | `/api/department_filter/<department_id>/`      | GET               | Filter departments by department ID.               |
-| `/api/department_teacher/<department_id>/`     | GET               | Retrieve teachers under a specific department by ID. |
-| `/api/department_student/<department_id>/`     | GET               | Retrieve students under a specific department by ID. |
+| `/app_departments/department_teacher/<department_id>/`     | GET               | Retrieve teachers under a specific department by ID. |
+| `/app_departments/department_student/<department_id>/`     | GET               | Retrieve students under a specific department by ID. |
 
 ---
 
@@ -46,7 +46,7 @@ There are 24 endpoints in total for your project. Here’s the breakdown by sect
 
 | Endpoint                                         | Method            | Description                                               |
 |--------------------------------------------------|-------------------|-----------------------------------------------------------|
-| `/api/teacher/`                                  | GET, POST         | Retrieve all teachers or create a new teacher.            |
+| `/app_/teacher/`                                  | GET, POST         | Retrieve all teachers or create a new teacher.            |
 | `/api/teacher/<teacher_id>/`                     | GET, PUT, DELETE  | Retrieve, update, or delete a teacher by ID.              |
 | `/api/teacher/sort_students/<teacher_name>/`     | GET               | Retrieve students taught by a specific teacher.           |
 | `/api/teacher/teacher_sort_a_z/`                 | GET               | Retrieve a list of teachers sorted alphabetically.        |

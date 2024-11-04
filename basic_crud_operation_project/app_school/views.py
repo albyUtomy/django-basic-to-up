@@ -26,7 +26,7 @@ import logging
 class SchoolCrud(APIView):
     queryset = School.objects.all()
 
-    def post(self, request, school_id=None):
+    def post(self, request):
         serializer = SchoolSerializer(data=request.data)
         if serializer.is_valid():
             school = serializer.save()
@@ -34,11 +34,11 @@ class SchoolCrud(APIView):
 
             for department_id in department_ids:
                 try:
-                    department = Department.objects.get(department_id=department_id)
+                    department = Department.active_object.get(department_id=department_id)
                     school.department_id.add(department)
                 except Department.DoesNotExist:
                     return Response({
-                        "error": f"Department with ID {department_id} not found"
+                        "error": f"Department with ID {department_id} not found or inactive"
                         }, status=status.HTTP_404_NOT_FOUND)
             return Response(SchoolSerializer(school).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -55,7 +55,7 @@ class SchoolCrudById(APIView):
     def get(self, request, school_id=None):
         if school_id:
             try:
-                school = School.objects.get(school_id=school_id)
+                school = School.active_object.get(school_id=school_id)
                 department_names = school.department_id.values_list('department_name', flat=True)
                 school_data = ListSchoolSerializer(school).data
                 school_data['department_id'] = list(department_names)
@@ -81,7 +81,7 @@ class SchoolCrudById(APIView):
             
             if department_ids:
                 try:
-                    departments = Department.objects.filter(department_id__in=department_ids)
+                    departments = Department.active_object.filter(department_id__in=department_ids)
                     updated_school.department_id.set(departments)
                 except Department.DoesNotExist:
                     return Response({"error": "Check if the department ID exists"}, status=status.HTTP_404_NOT_FOUND)

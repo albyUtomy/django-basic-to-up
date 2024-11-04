@@ -15,20 +15,20 @@ class DepartmentSerializer(serializers.ModelSerializer):
         model = Department
         fields = ['department_id','department_name','hod_name','hod_details','is_active']
 
-    def validate(self, attribute):
-        hod = attribute.get('hod_name')
-        department =  self.instance or Department.objects.get(department_id = attribute.get('department_id'))
+    # def validate(self, attribute):
+    #     hod = attribute.get('hod_name')
+    #     department =  self.instance or Department.objects.get(department_id = attribute.get('department_id'))
 
-        if hod:
-            if not hod.department_id.filter(department_id = department.department_id).exists():
-                raise serializers.ValidationError(f"The assigned HoD, {hod.name}, must belong to the {department.department_name} department.")
+    #     if hod:
+    #         if not hod.department_id.filter(department_id = department.department_id).exists():
+    #             raise serializers.ValidationError(f"The assigned HoD, {hod.name}, must belong to the {department.department_name} department.")
 
-            related_schools = department.department_school.all()
-            if not any(school for school in related_schools if school.department_id.filter(pk=department.department_id).exists()):
-                raise serializers.ValidationError(
-                f"The assigned HoD, {hod.name}, must be associated with a school that includes the {department.department_name} department."
-            )
-        return attribute
+    #         related_schools = department.department_school.all()
+    #         if not any(school for school in related_schools if school.department_id.filter(pk=department.department_id).exists()):
+    #             raise serializers.ValidationError(
+    #             f"The assigned HoD, {hod.name}, must be associated with a school that includes the {department.department_name} department."
+    #         )
+    #     return attribute
 # class DepartmentSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Department

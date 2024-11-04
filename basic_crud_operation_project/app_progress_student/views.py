@@ -24,17 +24,23 @@ class StudentCrudOperation(APIView):
             try:
                 for student in request.data:
                     school_id = student.get('school_id')
-                    department_id = student.get('department_id')
                     teacher_id = student.get('class_teacher_id')
 
-                    print(">>>>>>>>>>>>>>>>>>>>>>>>",department_id, school_id, teacher_id)
+                    print(">>>>>>>>>>>>>>>>>>>>>>>>",school_id, teacher_id)
 
-                    if teacher_id and department_id:
-                        print(department_id)
-                        teacher = Teacher.objects.filter(department_id=department_id)
-                        print(">>>>>>>>>>>>>",teacher)
-                        department = Department.objects.get(hod_name__teacher_id=teacher_id)
-                        print(">>>>>>>>>>",department)
+                    if school_id and teacher_id:
+                        # Filter the teacher by school and teacher ID
+                        teacher = Teacher.objects.filter(teacher_id=teacher_id, school_id=school_id).first()
+                        if teacher:
+                            # Check if the teacher is linked to any department
+                            department = Department.objects.filter(hod_name__teacher_id=teacher_id, school_id=school_id).first()
+                            if department:
+                                print("Teacher and department found:", teacher, department)
+                            else:
+                                print("No department associated with this teacher and school.")
+                        else:
+                            print("No teacher found for the provided school and teacher ID.")
+                serialize.save()
 
                 return Response(serialize.data, status=HTTP_201_CREATED)
             except IntegrityError as e:

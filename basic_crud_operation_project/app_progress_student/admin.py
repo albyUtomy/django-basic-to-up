@@ -5,8 +5,7 @@ from .models import Student_Progress
 # Register your models here.
 
 class StudentProgressAdmin(admin.ModelAdmin):
-    list_display = ('name', 'roll_no','is_active','school_id','department_id','class_teacher_id' ,
-                    'maths_mark', 'physics_mark', 'chemistry_mark', 'percentage', 'gained_mark','out_off')
+    list_display = ('name', 'roll_no','is_active','school_id','department_id','class_teacher_id' , 'percentage', 'gained_mark','out_off')
     
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)

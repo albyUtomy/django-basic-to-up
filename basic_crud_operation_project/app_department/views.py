@@ -10,7 +10,7 @@ from .models import Department
 from app_teacher.models import Teacher
 from app_progress_student.models import Student_Progress
 from .serializers import DepartmentSerializer
-from app_teacher.serializers import TeacherSerializer
+from app_teacher.serializers import TeacherDetailsSerializer
 from app_progress_student.serializers import StudentProcessSerializer
 
 
@@ -119,7 +119,7 @@ class DepartmentSort(APIView):
                 teachers = Teacher.objects.filter(department_id=department_id).order_by('name')  # Sort by name
                 if not teachers.exists():
                     return Response({'message': 'No teachers found for this department'}, status=status.HTTP_404_NOT_FOUND)
-                t_serializers = TeacherSerializer(teachers, many=True)
+                t_serializers = TeacherDetailsSerializer(teachers, many=True)
                 return Response({"Teacher's List": t_serializers.data}, status=status.HTTP_200_OK)
 
             elif '/department_student' in request.path:

@@ -22,60 +22,27 @@ from django.shortcuts import get_object_or_404
 
 
 class TeacherCreateListView(APIView):
+    queryset = Teacher.objects.all()
+
     def post(self, request):
-
-        
-        # With out any custom validation
         try:
-            serializer = TeacherSerializer(data=request.data, many=True)
+            serializer = TeacherSerializer(data = request.data)
             if serializer.is_valid():
-
-                """ 
-                # validation logic
-                for teacher in request.data:
-                    department_id = teacher.get('department_id')
-                    school_id = teacher.get('school_id')
-
-                    # Check if the school is active
+                teacher = serializer.save()
+                department_ids = request.data.get('department_id',[])
+                for department_id in department_ids:
                     try:
-                        school = School.objects.get(school_id=school_id, is_active=True)
-                    except School.DoesNotExist:
-                        return Response({'error': f"School with ID {school_id} does not exist or is not active."},
-                                        status=status.HTTP_400_BAD_REQUEST)
-
-                    # Check if the department exists and is active
-                    try:
-                        department = Department.objects.get(department_id=department_id, is_active=True)
+                        department = Department.active_object.get(department_id=department_id)
+                        teacher.department_id.add(department)
                     except Department.DoesNotExist:
-                        return Response({'error': f"Department with ID {department_id} does not exist or is not active."},
-                                        status=status.HTTP_400_BAD_REQUEST)
-
-                    # Check if the department belongs to the specified school
-                    if department.school_id != school:
-                        d_filter = Department.objects.filter(school_id=school_id, is_active=True).values('department_name', 'department_id')
-
-                        if not d_filter.exists():
-                            return Response({'error': f"School ID: {school_id} has no active departments."}, 
-                                            status=status.HTTP_400_BAD_REQUEST)
-
                         return Response({
-                            'error': f"Department with ID {department_id} does not belong to school {school_id} or is not active.",
-                            'departments_belonging_to_school': list(d_filter)
-                        }, status=status.HTTP_400_BAD_REQUEST)
-
-                # Save the serializer data after all checks are successful
-
-                """
-                serializer.save()
-                return Response({'data': serializer.data}, status=status.HTTP_201_CREATED)
-            else:
-                return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                            "error": f"Department with ID {department_id} not found"
+                        }, status=status.HTTP_404_NOT_FOUND)
+                return Response(TeacherSerializer(teacher).data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)        
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-
-        
-
+    
     def get(self, request):
         try:
             teacher = Teacher.active_objects.all()
@@ -89,7 +56,7 @@ class TeacherCreateListView(APIView):
 
 
 
-class GetUpdateDelete_ID(APIView):
+class GetUpdate_ID(APIView):
     def get(self, request, teacher_id):
         try:
             teacher = Teacher.active_objects.filter(teacher_id=teacher_id).first()
@@ -108,18 +75,32 @@ class GetUpdateDelete_ID(APIView):
 
     def put(self, request, teacher_id):
         try:
-            teacher = Teacher.objects.get(teacher_id = teacher_id)
-            serializer = TeacherSerializer(teacher, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response({'data': serializer.data}, status=status.HTTP_201_CREATED)
-            else:
-                return Response({'error': 'Invalid data', 'details': serializer.errors},status=status.HTTP_400_BAD_REQUEST)
+            teacher = Teacher.active_objects.get(teacher_id = teacher_id)
         except Teacher.DoesNotExist:
-            return Response({'message':'Table not found'}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({'message':str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error':'Teacher not found'}, status=status.HTTP_400_BAD_REQUEST)
         
+        serializer = TeacherSerializer(teacher, data=request.data, partial=True)
+        if serializer.is_valid():
+            print("<><><><><><>", serializer)
+
+            updated_teacher = serializer.save()
+            department_ids = request.data.get('department_id')
+            print("<><><><><><>", department_ids)
+            if department_ids:
+                try:
+                    departments = Department.active_object.filter(department_id__in=department_ids)
+                    updated_teacher.department_id.set(departments)
+                except Department.DoesNotExist:
+                    print(">>>>>>>>>>HI>>>>>>>>>>")
+                    print(">>>>>>>>>>HI>>>>>>>>>>")
+                    print(">>>>>>>>>>HI>>>>>>>>>>")
+                    return Response({"error": "Check if the department ID exists"}, status=status.HTTP_404_NOT_FOUND)
+            
+            return Response(TeacherSerializer(updated_teacher).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+    
         
     # def delete(self, request, teacher_id):
     #     try:
