@@ -15,15 +15,15 @@ from app_progress_student.models import Student_Progress
 # from app_department.serializers import DepartmentSerializer
 
 class StudentProcessSerializer(serializers.ModelSerializer):
-    class_teacher_id = serializers.PrimaryKeyRelatedField(queryset=Teacher.objects.all(), write_only=True, required=False)
+    class_teacher_id = serializers.PrimaryKeyRelatedField(queryset=Teacher.objects.all())
     # class_teacher = serializers.SerializerMethodField()
-    class_teacher = serializers.StringRelatedField(source='class_teacher_id', read_only=True)
+    # class_teacher = serializers.StringRelatedField(source='class_teacher_id', read_only=True)
 
-    department_id = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all(), write_only=True, required=False)
-    department_details = serializers.StringRelatedField(source='department_id', read_only=True)
+    department_id = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all())
+    # department_details = serializers.StringRelatedField(source='department_id', read_only=True)
 
-    school_id = serializers.PrimaryKeyRelatedField(queryset=School.objects.all(), write_only=True, required=False)
-    school_details = serializers.StringRelatedField(source='school_id', read_only=True)
+    school_id = serializers.PrimaryKeyRelatedField(queryset=School.objects.all())
+    # school_details = serializers.StringRelatedField(source='school_id', read_only=True)
 
     class Meta:
         model = Student_Progress
@@ -37,11 +37,12 @@ class StudentProcessSerializer(serializers.ModelSerializer):
                     'physics_mark',
                     'maths_mark',
                     'class_teacher_id',
-                    'class_teacher',
+                    # 'class_teacher',
                     'school_id',
-                    'school_details',
+                    # 'school_details',
                     'department_id',
-                    'department_details',
+                    # 'department_details',
+                    'is_active'
                     
                 ]
         

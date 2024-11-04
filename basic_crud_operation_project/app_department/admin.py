@@ -4,19 +4,15 @@ from .models import Department
 
 # Register your models here.
 class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ('department_id', 'hod_name','school_id', 'department_name')
+    list_display = ('department_id', 'department_name','is_active', 'hod_name')
+    list_filter = ('is_active',)
     
-    def save_model(self, request, obj, form, change):
+    # def save_model(self, request, obj, form, change):
+    #     super().save_model(request, obj, form, change)
 
-        # Ensure that `hod_name` belongs to the same department before saving
-        if obj.hod_name and obj.hod_name.department_id != obj:
-            # Display warning to the user in the admin interface
-            self.message_user(
-                request, 
-                f"The assigned HoD, {obj.hod_name.name}, does not belong to the {obj.department_name} department and was not saved as HoD.", 
-                level=messages.WARNING
-            )
-            obj.hod_name = None  # Clear invalid HoD assignment to prevent save error
-
-        super().save_model(request, obj, form, change)
+    #     if obj.warning_message:
+    #         self.message_user(request, obj.warning_message, level=messages.WARNING)
+    #     else:
+    #         self.message_user(request, f"The department '{obj.department_name}' was changed successfully.", level=messages.SUCCESS)
+        
 admin.site.register(Department, DepartmentAdmin)

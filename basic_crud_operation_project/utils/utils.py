@@ -77,17 +77,16 @@ def assign_hod_name(department_instance_in, teacher_instance):
     """
     Sets the highest-performing teacher as the head of department (`hod_name`).
     Clears conflicting `hod_name` assignments from other departments.
-    """
-    
+    """    
     # Find the best-performing teacher in the department
     best_teacher = teacher_instance.__class__.objects.filter(
-        department_id=department_instance_in
+        department_id__in=department_instance_in, is_active=True
     ).order_by('-performance_rate').first()
 
     if best_teacher:
         # Clear conflicting `hod_name` assignments from other departments
         conflicting_departments = department_instance_in.__class__.objects.filter(
-            hod_name=best_teacher
+            hod_name=best_teacher, is_active=True
         ).exclude(pk=department_instance_in.pk)
         
         for conflict in conflicting_departments:

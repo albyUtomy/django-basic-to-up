@@ -22,7 +22,20 @@ class StudentCrudOperation(APIView):
         serialize = StudentProcessSerializer(data = request.data, many=True)
         if serialize.is_valid():
             try:
-                serialize.save()
+                for student in request.data:
+                    school_id = student.get('school_id')
+                    department_id = student.get('department_id')
+                    teacher_id = student.get('class_teacher_id')
+
+                    print(">>>>>>>>>>>>>>>>>>>>>>>>",department_id, school_id, teacher_id)
+
+                    if teacher_id and department_id:
+                        print(department_id)
+                        teacher = Teacher.objects.filter(department_id=department_id)
+                        print(">>>>>>>>>>>>>",teacher)
+                        department = Department.objects.get(hod_name__teacher_id=teacher_id)
+                        print(">>>>>>>>>>",department)
+
                 return Response(serialize.data, status=HTTP_201_CREATED)
             except IntegrityError as e:
                 return Response({'error':'Student Roll Number Already Exist'}, status=HTTP_400_BAD_REQUEST)
@@ -77,12 +90,13 @@ class StudentModification(APIView):
             serializer = StudentProcessSerializer(student, data=request.data, partial=True)
             
             if serializer.is_valid():
+                print(serializer)
                 serializer.save()
                 return Response(serializer.data, status=HTTP_200_OK)
             return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
             
         except Student_Progress.DoesNotExist:
-            return Response({'error': 'Student not found'}, status=HTTP_404_NOT_FOUND)
+            return Response({'error': 'Student not found'}, status=HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error':'An error occurred while retrieving data from the server', 'details':str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
         
@@ -179,10 +193,7 @@ class StudentMarkStatistic(APIView):
                         serialize = CombinedMarksSerializer(top_students, many=True)
                         return Response({'top_students': serialize.data}, status=HTTP_200_OK)
                     except:
-                        return Response({"error":"Topers List is not found"}, status=HTTP_400_BAD_REQUEST)  
-                    
-                # elif filtration == 'best_teacher':
-                #     
+                        return Response({"error":"Topers List is not found"}, status=HTTP_400_BAD_REQUEST)   
 
             except Exception as e:
                         return Response({
@@ -192,3 +203,8 @@ class StudentMarkStatistic(APIView):
             
             
             
+class ActiveOrNot(APIView):
+    def get(self,request):
+        students = Student_Progress.objects.filter(is_active=True)
+        serializers =StudentProcessSerializer(students, many=True)
+        return Response({'message': serializers.data}, status=HTTP_200_OK)

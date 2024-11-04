@@ -15,7 +15,6 @@ from app_progress_student.serializers import StudentProcessSerializer
 
 
 class DepartmentCrud(APIView):
-
     def post(self, request):
         try:
             serializers = DepartmentSerializer(data=request.data, many=True)
@@ -30,7 +29,7 @@ class DepartmentCrud(APIView):
         
     def get(self, request):
         try:
-            departments = Department.objects.all()
+            departments = Department.objects.filter(is_active=True)
             serializer = DepartmentSerializer(departments, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Department.DoesNotExist:
@@ -39,23 +38,11 @@ class DepartmentCrud(APIView):
             return Response({'error':str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
-    def delete(self, request):
-        try:
-            department = Department.objects.all()
-            if department.exists():
-                department.delete()
-                return Response({'message':'All department is successfully deleted'}, status=status.HTTP_200_OK)
-        except Department.DoesNotExist:
-            return Response({'message':'No records found to delete'}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({'message':str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-
 class Department_by_Id(APIView):
     def get(self, request, department_id):
         try:
-            department = Department.objects.get(department_id=department_id)
-            serializer = DepartmentSerializer(department)
+            department = Department.objects.filter(department_id=department_id, is_active=True)
+            serializer = DepartmentSerializer(department, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Department.DoesNotExist:
             return Response({'message':'Id not exist'}, status=status.HTTP_404_NOT_FOUND)
@@ -85,6 +72,7 @@ class Department_by_Id(APIView):
         except Exception as e:
             return Response({'message':str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+
 
     def delete(self, request, department_id):
         try:
@@ -132,7 +120,7 @@ class DepartmentSort(APIView):
                 if not teachers.exists():
                     return Response({'message': 'No teachers found for this department'}, status=status.HTTP_404_NOT_FOUND)
                 t_serializers = TeacherSerializer(teachers, many=True)
-                return Response({'Teachers': t_serializers.data}, status=status.HTTP_200_OK)
+                return Response({"Teacher's List": t_serializers.data}, status=status.HTTP_200_OK)
 
             elif '/department_student' in request.path:
                 students = Student_Progress.objects.filter(department_id=department_id).order_by('-marks')  # Sort by marks
