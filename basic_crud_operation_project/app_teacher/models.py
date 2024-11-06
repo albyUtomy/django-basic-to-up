@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 # from utils.utils import get_best_value
-from django.db import transaction
+# from django.db import transaction
 
 # Create your models here.
 

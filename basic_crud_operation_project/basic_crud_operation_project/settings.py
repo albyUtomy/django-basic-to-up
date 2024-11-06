@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-d!95z02u#*kr_wbvl0r4y2gce3gj19f5&amh$1$ug^lvd!1@h8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -31,12 +31,14 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'app_users',
+    'app_user_authentication',
     'app_progress_student',
     'app_teacher',
     'app_department',
     'app_school',
     'rest_framework',
+    'rest_framework.authtoken', #include authentication app of restframwork
+
     'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -108,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# AUTH_USER_MODEL = 'app_users.Custom_User'
+AUTH_USER_MODEL = 'app_user_authentication.Custom_User'
 
 
 
@@ -134,3 +136,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES':[
+        'rest_framework.authentication.TokenAuthentication'
+    ]
+}
