@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .serializers import LoginSerializer, CustomUserSerializer
+from django.shortcuts import get_object_or_404
+from app_school.models import School
 
 
 
@@ -64,6 +66,7 @@ class LogoutView(APIView):
             return Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
         except Token.DoesNotExist:
             return Response({"error": "Token not found."}, status=status.HTTP_400_BAD_REQUEST)
+        
 
 
 class CreateUserView(APIView):
@@ -72,6 +75,21 @@ class CreateUserView(APIView):
     """
 
     def post(self, request):
+        school_id = request.data.get("school")
+        department_ids = request.data.get("department", [])
+
+        # Validate that the school contains the given departments
+        school = get_object_or_404(School, school_id=school_id)
+        valid_departments = school.department_id.values_list('department_id', flat=True)
+
+        # Check if all provided departments belong to the specified school
+        if not all(dept_id in valid_departments for dept_id in department_ids):
+            return Response(
+                {"error": "One or more departments do not belong to the specified school."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Proceed with user creation
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
@@ -81,44 +99,5 @@ class CreateUserView(APIView):
                 "email": user.email,
                 "message": "User created successfully."
             }, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-# class LoginView(APIView):
-#     """
-#     API View for user login that returns an authentication token.
-#     """
-#     def post(self, request):
-#         serializer = LoginSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-
-#         username = serializer.validated_data['username']
-#         password = serializer.validated_data['password']
-
-#         try:
-#             # Authenticate the user
-#             user = authenticate(request, username=username, password=password)
-
-#             if user is not None:
-#                 # Generate or retrieve the token for the authenticated user
-#                 token, created = Token.objects.get_or_create(user=user)
-#                 return Response({
-#                     "token": token.key,
-#                     "message": "Login successful."
-#                 }, status=status.HTTP_200_OK)
-#             else:
-#                 # Specific message for invalid credentials
-#                 return Response(
-#                     {"error": "Invalid username or password"},
-#                     status=status.HTTP_400_BAD_REQUEST
-#                 )
-
-#         except Exception as e:
-#             # Catch any unexpected errors
-#             return Response(
-#                 {"error": "An error occurred. Please try again later."},
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-#             )
